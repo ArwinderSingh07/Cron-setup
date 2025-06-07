@@ -1,0 +1,85 @@
+name: SSL Certificate Monitor
+
+on:
+  schedule:
+    - cron: "0 1 * * *" # Region A
+    - cron: "0 2 * * *" # Region B
+    - cron: "0 3 * * *" # Region C
+    - cron: "0 4 * * *" # Region D
+    - cron: "0 5 * * *" # Region E
+    - cron: "0 6 * * *" # Region F
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "Choose region to monitor (region-a to region-f)"
+        required: false
+        default: "manual"
+
+jobs:
+  monitor-cert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set region from cron or manual input
+        id: set-region
+        run: |
+          REGION_INPUT="${{ github.event.inputs.region }}"
+          if [ -n "$REGION_INPUT" ] && [ "$REGION_INPUT" != "manual" ]; then
+            REGION="$REGION_INPUT"
+          else
+            case "${{ github.event.schedule }}" in
+              "0 1 * * *")
+                REGION="region-a"
+                ;;
+              "0 2 * * *")
+                REGION="region-b"
+                ;;
+              "0 3 * * *")
+                REGION="region-c"
+                ;;
+              "0 4 * * *")
+                REGION="region-d"
+                ;;
+              "0 5 * * *")
+                REGION="region-e"
+                ;;
+              "0 6 * * *")
+                REGION="region-f"
+                ;;
+              *)
+                REGION="manual"
+                ;;
+            esac
+          fi
+          echo "region=$REGION" >> $GITHUB_OUTPUT
+
+      - name: Monitor Certificate
+        run: |
+          REGION="${{ steps.set-region.outputs.region }}"
+          echo "🔍 Monitoring SSL certificate for: $REGION"
+
+          case "$REGION" in
+            region-a)
+              echo "Running cert check for Region A (e.g., https://region-a.example.com)"
+              ;;
+            region-b)
+              echo "Running cert check for Region B"
+              ;;
+            region-c)
+              echo "Running cert check for Region C"
+              ;;
+            region-d)
+              echo "Running cert check for Region D"
+              ;;
+            region-e)
+              echo "Running cert check for Region E"
+              ;;
+            region-f)
+              echo "Running cert check for Region F"
+              ;;
+            *)
+              echo "No specific region detected or manual run"
+              ;;
+          esac
+
+          # Example: actual cert check can be added here using curl or openssl
