@@ -1,0 +1,33 @@
+name: Test Dynamic Needs
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_job_b:
+        description: "Run Job B?"
+        required: true
+        default: "no"
+
+jobs:
+  jobA:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step A
+        run: echo "Running Job A"
+
+  jobB:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.run_job_b == 'yes' }}
+    steps:
+      - name: Step B
+        run: echo "Running Job B"
+
+  finalJob:
+    name: Final Job (Always Runs After A, Conditionally After B)
+    needs: [jobA, jobB]  # jobB is conditionally skipped
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final Step
+        run: |
+          echo "Final Job triggered after Job A and (possibly) Job B"
+          echo "Job B input was: ${{ github.event.inputs.run_job_b }}"
