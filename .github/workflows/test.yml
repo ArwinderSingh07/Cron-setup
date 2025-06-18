@@ -24,10 +24,12 @@ jobs:
 
   finalJob:
     name: Final Job (Always Runs After A, Conditionally After B)
-    needs: [jobA, jobB]  # jobB is conditionally skipped
+    needs: [jobA, jobB]
+    if: always()  # <--- This ensures finalJob runs even if jobB was skipped
     runs-on: ubuntu-latest
     steps:
       - name: Final Step
         run: |
           echo "Final Job triggered after Job A and (possibly) Job B"
           echo "Job B input was: ${{ github.event.inputs.run_job_b }}"
+
