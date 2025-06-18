@@ -1,6 +1,7 @@
-name: Test Dynamic Needs
+name: Test Dynamic Needs with Awareness
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       run_job_b:
@@ -18,18 +19,26 @@ jobs:
   jobB:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.run_job_b == 'yes' }}
+    outputs:
+      did_run: 'true'
     steps:
       - name: Step B
         run: echo "Running Job B"
 
   finalJob:
-    name: Final Job (Always Runs After A, Conditionally After B)
     needs: [jobA, jobB]
-    if: always()  # <--- This ensures finalJob runs even if jobB was skipped
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Final Step
+      - name: Detect if Job B Ran
         run: |
-          echo "Final Job triggered after Job A and (possibly) Job B"
-          echo "Job B input was: ${{ github.event.inputs.run_job_b }}"
+          if [[ "${{ needs.jobB.result }}" == "success" ]]; then
+            echo "✅ Job B ran successfully"
+          elif [[ "${{ needs.jobB.result }}" == "skipped" ]]; then
+            echo "⏭️ Job B was skipped"
+          else
+            echo "❌ Job B did not complete successfully"
+          fi
 
+      - name: Final Step
+        run: echo "Final job logic runs regardless."
