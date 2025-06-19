@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Step A
-        run: echo "Running Job A"
+        run: echo "Running Job A ${{vars.NAME}}"
 
   jobB:
     runs-on: ubuntu-latest
