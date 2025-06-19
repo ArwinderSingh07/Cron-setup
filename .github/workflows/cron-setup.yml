@@ -17,6 +17,7 @@ on:
 
 jobs:
   monitor-cert:
+    name: Monitor SSL for ${{ steps.set-region.outputs.region || 'unknown-region' }}
     runs-on: ubuntu-latest
 
     steps:
